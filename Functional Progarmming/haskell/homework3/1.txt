@@ -1,0 +1,41 @@
+firstPossible :: Int -> [Int] -> Int
+firstPossible n ln
+  | null ln = -1
+  | head ln > n = head ln
+  | otherwise = firstPossible n (tail ln)
+
+genList :: Int -> Int -> Int -> [Int] -> [Int] -> [Int]
+genList ba bb countPairs la lb = helper ba bb countPairs ba bb []
+  where
+    helper begA begB count lastA lastB res
+      | count == 0 = res
+      | begA < lastA || begB < lastB = []
+      | otherwise =
+        helper
+          (firstPossible begB la)
+          (firstPossible (firstPossible begB la) lb)
+          (count - 1)
+          begA
+          begB
+          (res ++ [begA, begB])
+
+genAllLists :: Int -> Int -> [Int] -> [Int] -> [[Int]]
+genAllLists ba bb la lb = helper ba bb 1 []
+  where
+    helper begA begB count res
+      | begA > begB = []
+      | null (genList begA begB count la lb) = res
+      | otherwise =
+        helper begA begB (count + 1) (res ++ [genList begA begB count la lb])
+
+generate :: [Int] -> [Int] -> [[Int]]
+generate _ [] = []
+generate [] _ = []
+generate la lb = helper la lb []
+  where
+    helper a b res
+      | null a = res
+      | null b = helper (tail a) lb res
+      | otherwise =
+        helper a (tail b) (res ++ genAllLists (head a) (head b) la lb)
+
