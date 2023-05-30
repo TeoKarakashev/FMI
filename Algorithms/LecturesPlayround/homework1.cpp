@@ -10,36 +10,43 @@ int foo(int a) {
     return z;
 }
 
-void someAlg(int*& A, int l, int h) {
-    if (l < h) {
-        if (A[l] > A[h]) {
-            std::swap(A[l], A[h]);
-        }
-        int t = (h - l + 1) / 3;
-        if (t >= 1) {
-            someAlg(A, l, h - t);
-            someAlg(A, l + t, h);
-            someAlg(A, l, h - t);
-        }
+int counter = 0;
+int size = 5;
+
+void print(int*& A) {
+    for (int i = 0; i < size; i++) {
+        std::cout << A[i] << " ";
     }
+    std::cout << std::endl;
+}
+
+void someAlg(int*& A, int l, int h) {
+
+    if (A[l] > A[h]) {
+        std::swap(A[l], A[h]);
+    }
+    int t = (h - l + 1) / 3;
+    if (t >= 1) {
+        someAlg(A, l + t, h);
+        someAlg(A, l, h - t);
+        someAlg(A, l + t, h);
+    }
+
 }
 
 
+
 int main() {
-    int* arr = new int[10];
+    //create test for someAlg
+    int* A = new int[size];
     srand(time(NULL));
-    for (int i = 0; i < 10; i++) {
-        arr[i] = rand() % 100;
-    } 
-    for (int i = 0; i < 10; i++) {
-        std::cout << arr[i] << " ";
+    for (int i = 0; i < size; i++) {
+        A[i] = rand () % 100;
     }
-    std::cout<<std::endl;
-    someAlg(arr, 0, 4);
-    for (int i = 0; i < 10; i++) {
-        std::cout << arr[i] << " ";
-    }
-    std::cout << std::endl;
+    print(A);
+    someAlg(A, 0, size - 1);
+    print(A);
+    delete[] A;
     return 0;
 
 }
