@@ -2,6 +2,8 @@
 #include <ESPAsyncWebServer.h>
 #include <WiFi.h>
 #include <AsyncTCP.h>
+#include <WiFiClient.h>
+#include <WiFiAP.h>
 
 #define MOTOR_RIGHT_FRONT1 13
 #define MOTOR_RIGHT_FRONT2 12
@@ -37,7 +39,7 @@ void declarePins() {
   pinMode(MOTOR_LEFT_BACK2, OUTPUT);
 }
 
-const char* ssid     = "WiFiCar";
+const char* ssid     = "wifiCar";
 const char* password = "12345678910";
 
 AsyncWebServer server(80);
@@ -79,9 +81,6 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
     </style>
   </head>
   <body class="noselect" align="center" style="background-color:white">
-     
-    <h1 style="color: teal;text-align:center;">Hash Include Electronics</h1>
-    <h2 style="color: teal;text-align:center;">Wi-Fi &#128663; Control</h2>
     
     <table id="mainTable" style="width:400px;margin:auto;table-layout:fixed" CELLSPACING=10>
       <tr>
@@ -132,7 +131,7 @@ const char* htmlHomePage PROGMEM = R"HTMLHOMEPAGE(
 )HTMLHOMEPAGE";
 
 void processCarMovement(String inputValue) {
-  Serial.printf("Got value as %s %d\n", inputValue.c_str(), inputValue.toInt());  
+ // Serial.println("Got value as %s %d\n", inputValue.c_str(), inputValue.toInt());  
   switch(inputValue.toInt()) {
     case UP:
       move_forward(SPEED);                
@@ -282,7 +281,7 @@ void handleRoot(AsyncWebServerRequest *request) {
 }
 
 void handleNotFound(AsyncWebServerRequest *request) {
-    request->send(404, "text/plain", "File Not Found");
+    request->send(404, "text/plain", "File Not Found!");
 }
 
 
@@ -290,11 +289,11 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsE
                       void *arg, uint8_t *data,  size_t len) {                      
   switch (type) {
     case WS_EVT_CONNECT:
-      Serial.printf("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
+      //Serial.println("WebSocket client #%u connected from %s\n", client->id(), client->remoteIP().toString().c_str());
       //client->text(getRelayPinsStatusJson(ALL_RELAY_PINS_INDEX));
       break;
     case WS_EVT_DISCONNECT:
-      Serial.printf("WebSocket client #%u disconnected\n", client->id());
+      //Serial.println("WebSocket client #%u disconnected\n", client->id());
       processCarMovement("0");
       break;
     case WS_EVT_DATA:
@@ -333,6 +332,23 @@ void setup() {
   Serial.println("HTTP server started");
 }
 
+void motorTest(){
+  delay(1000);
+  move_forward(120);
+   delay(1000);
+  move_backward(120);
+   delay(1000);
+  move_left(120);
+   delay(1000);
+  move_right(120);
+  delay(1000);
+  motor_stop();
+  delay(1000);
+  
+}
+
+
 void loop() {
-  ws.cleanupClients(); 
+ // ws.cleanupClients(); 
+  motorTest();
 }

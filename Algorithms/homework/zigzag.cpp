@@ -2,12 +2,23 @@
 #include <vector>
 #include <queue>
 
+struct edgePQ {
+
+    long long dist;
+    int u;
+    bool comesFromHigher;
+
+};
+
+bool operator<(const edgePQ& lhs, const edgePQ& rhs) {
+    return lhs.dist < rhs.dist;
+}
+
 int n, m;
-const int INF = 1000000000;
+#define INF 100000000000000
 const int SOURCE = 1;
-bool visited[100001];
-int dist[100001];
-int parent[100001];
+long long distHigher[100001];
+long long distLower[100001];
 std::vector<std::vector<std::pair<int, int>>> graph;
 
 int main() {
@@ -22,35 +33,38 @@ int main() {
         graph[a].push_back({ b, c });
         graph[b].push_back({ a, c });
     }
-    std::fill(dist, dist + n + 1, INF);
-    dist[SOURCE] = 0;
-    std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, std::greater<std::pair<int, int>>> pq;
-    pq.push({ 0, SOURCE });
-    parent[SOURCE] = 0;
+    std::fill(distHigher, distHigher + n + 1, INF);
+    std::fill(distLower, distLower + n + 1, INF);
+    distHigher[SOURCE] = 0;
+    distLower[SOURCE] = 0;
+    std::queue <edgePQ> pq;
+    pq.push({ 0, SOURCE , false });
     while (!pq.empty()) {
-        int curDist = pq.top().first;
-        int u = pq.top().second;
+        long long curDist = pq.front().dist;
+        int u = pq.front().u;
+        bool comesFromHigher = pq.front().comesFromHigher;
         pq.pop();
-        visited[u] = true;
 
         for (const std::pair<int, int>& p : graph[u]) {
             int v = p.first;
             int weight = p.second;
-            if (!visited[v] && curDist + weight < dist[v]) {
-                dist[v] = curDist + weight;
-                pq.push({ dist[v], v });
-                parent[v] = u;
+            if (comesFromHigher) {
+                if (u > v) {
+                    if (curDist + weight < distLower[v]) {
+                        distLower[v] = curDist + weight;
+                        pq.push({ distLower[v], v, false });
+                    }
+                }
+            }
+            else {
+                if (v > u) {
+                    if (curDist + weight < distHigher[v]) {
+                        distHigher[v] = curDist + weight;
+                        pq.push({ distHigher[v], v, true });
+                    }
+                }
             }
         }
     }
-    std::cout << dist[n] <<std::endl;
-    std::vector<int> path;
-    int cur = n;
-    while (cur != 0) {
-        path.push_back(cur);
-        cur = parent[cur];
-    }
-    for (int i = path.size() - 1; i >= 0; i--) {
-        std::cout << path[i]<<" ";
-    }
+    std::cout << distHigher[n];
 }
